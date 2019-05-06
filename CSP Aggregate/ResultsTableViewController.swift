@@ -38,6 +38,11 @@ class ResultsTableViewController: UITableViewController {
         urlString = UserDefaults.standard.string(forKey: "REMOTE-URL") ?? "http://ec2-18-191-38-225.us-east-2.compute.amazonaws.com:5000/submit/matchscouting"
     }
     
+    func randomString(length: Int) -> String {
+        let letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        return String((0..<length).map{ _ in letters.randomElement()! })
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         tableView.reloadData()
     }
@@ -64,6 +69,20 @@ class ResultsTableViewController: UITableViewController {
         alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (alertAction) in
             
             let combinedMatches = results.joined(separator: "~~~~~")
+            
+            let file = "\(self.randomString(length: 10)).csv"
+            
+            if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+                
+                let fileURL = dir.appendingPathComponent(file)
+                
+                //writing
+                do {
+                    try combinedMatches.write(to: fileURL, atomically: false, encoding: .utf8)
+                }
+                catch {print("ERROR 1")}
+            }
+            
             guard let url = URL(string: urlString) else {
                 print("Error generating url")
                 return
